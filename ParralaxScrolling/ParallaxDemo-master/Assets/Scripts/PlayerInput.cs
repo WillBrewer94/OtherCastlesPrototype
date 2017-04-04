@@ -5,7 +5,7 @@ using System.Collections;
 public class PlayerInput : MonoBehaviour {
     Player player;
     Animator anim;
-    public Controller2D cursor;
+    bool isPause = true;
 
     void Start() {
         player = GetComponent<Player>();
@@ -25,7 +25,9 @@ public class PlayerInput : MonoBehaviour {
             player.OnJumpInputUp();
         }
 
-        
+        if(Input.GetKeyDown(KeyCode.LeftShift)) {
+
+        }
     }
 
     //Returns a vector direction of the right joystick

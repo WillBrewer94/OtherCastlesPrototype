@@ -4,7 +4,8 @@ using UnityEngine.SceneManagement;
 
 [RequireComponent (typeof (Controller2D))]
 public class Player : MonoBehaviour {
-    float playerDeltaTime;
+    public float playerDeltaTime;
+
     //public Vector2 moveDir = new Vector2(0, 1);
     GameObject checkpoint;
     Animator anim;
@@ -54,8 +55,7 @@ public class Player : MonoBehaviour {
 
     void Update() {
         //Delta Time Adjustments
-        //playerDeltaTime = BattleController.Shared().playerDelta;
-        playerDeltaTime = Time.fixedDeltaTime;
+        playerDeltaTime = BattleController.Shared().playerDelta;
 
         CalculateVelocity();
         HandleWallSliding();
@@ -66,10 +66,6 @@ public class Player : MonoBehaviour {
         //Animation Stuff
         anim.SetFloat("Speed", Mathf.Abs(velocity.x));
         
-
-
-
-
         //Reset Gravity if colliding with ground
         if(controller.collisions.above || controller.collisions.below) {
             velocity.y = 0;
@@ -77,23 +73,6 @@ public class Player : MonoBehaviour {
 
         if(controller.collisions.below || controller.collisions.right || controller.collisions.left) {
             jumps = 0;
-        }
-    }
-
-    public void OnTriggerEnter2D(Collider2D col) {
-        if(col.tag == "Checkpoint") {
-            checkpoint = col.gameObject;
-            Debug.Log("Checkpoint");
-        }
-
-        if(col.tag == "Death") {
-            SceneManager.LoadScene("ParallaxScene");
-            Debug.Log("Death");
-        }
-
-        if(col.tag == "End") {
-            Scene scene = SceneManager.GetActiveScene();
-            SceneManager.LoadScene(scene.name);
         }
     }
 
@@ -115,7 +94,6 @@ public class Player : MonoBehaviour {
                 velocity.x = -wallDirX * wallLeap.x;
                 velocity.y = wallLeap.y;
             }
-            
         }
 
         if(jumps < 2) {
@@ -125,7 +103,6 @@ public class Player : MonoBehaviour {
     }
 
     public void OnJumpInputUp() {
-        dirInput = new Vector2(1, 0);
         if(velocity.y > minJumpVelocity) {
             velocity.y = minJumpVelocity;
         }
@@ -163,6 +140,5 @@ public class Player : MonoBehaviour {
                 timeToWallUnstick = wallStickTime;
             }
         }
-
     }
 }
