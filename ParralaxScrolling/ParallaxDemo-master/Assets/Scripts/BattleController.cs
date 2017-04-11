@@ -7,8 +7,13 @@ public class BattleController : MonoBehaviour {
     //Singleton battle manager
     private static BattleController shared;
 
+    //Components
+    public LineRenderer lineRender;
+
     //Battle UI
     public Text turnText;
+    public GameObject blinkCursor;
+    public float cursorSpeed = 10;
 
     //GameObjects
     public GameObject player;
@@ -22,7 +27,7 @@ public class BattleController : MonoBehaviour {
     public float turnTime = 1;
 
     //Is Time Paused
-    private bool isPause = false;
+    public bool isPause = false;
 
     void Awake() {
         //Make sure only one battle manager exists at a time
@@ -35,6 +40,7 @@ public class BattleController : MonoBehaviour {
 
     void Start() {
         player = GameObject.FindGameObjectWithTag("Player");
+        lineRender = GetComponent<LineRenderer>();
     }
 
     void Update() {
@@ -44,6 +50,15 @@ public class BattleController : MonoBehaviour {
             player.GetComponent<Animator>().speed = 0;
             Mathf.SmoothDamp(playerDelta, playerDeltaTarget, ref playerDelta, pauseSmoothTime);
 
+            //Move Blink Cursor
+            blinkCursor.SetActive(true);
+            blinkCursor.transform.Translate(player.GetComponent<Player>().dirInput * Time.deltaTime * cursorSpeed);
+
+            //Draw Line
+            lineRender.enabled = true;
+            lineRender.SetPosition(0, player.GetComponent<BoxCollider2D>().bounds.center);
+            lineRender.SetPosition(1, blinkCursor.GetComponent<BoxCollider2D>().bounds.center);
+
         } else {
             //Start animations and player movement
             playerDelta = Time.deltaTime;
@@ -52,21 +67,42 @@ public class BattleController : MonoBehaviour {
 
             //Run timer until 2 seconds have passed, then pause again
             Countdown();
+
+            //Hide Line and Cursor
+            lineRender.enabled = false;
+            blinkCursor.SetActive(false);
         }
     }
 
+    //Singleton Access Method
     public static BattleController Shared() {
         return shared;
     }
 
+    //Getter method for isPaused
     public bool IsPaused() {
         return isPause;
     }
 
+    //Switches pause state and runs relevant code
     public void SwitchPause() {
         isPause = !isPause;
+
+        //Run logic for enemies
+        GameObject[] enemies = GetEnemyList();
+
+        foreach(GameObject enemy in enemies) {
+            enemy.GetComponent<Enemy>().OnPause();
+        }
     }
 
+    
+
+    //====================================================
+    //                  Helper Methods                   =
+    //====================================================
+
+    //Countdown timer for x seconds, stored in the timer variable
     public void Countdown() {
         if(timer > 0) {
             timer -= Time.deltaTime;
@@ -74,5 +110,22 @@ public class BattleController : MonoBehaviour {
             isPause = true;
             timer = turnTime;
         }
+    }
+
+    //Finds all the active enemies on the scene
+    public GameObject[] GetEnemyList() {
+        return GameObject.FindGameObjectsWithTag("Enemy");
+    }
+
+    //Returns the angle of the line to be drawn by the LineRenderer
+    public void Angle() {
+        lineRender.enabled = true;
+        lineRender.SetPosition(0, player.GetComponent<BoxCollider2D>().bounds.center);
+
+        //Trig Shit
+        float x = player.GetComponent<BoxCollider2D>().bounds.center.x + 8 * Mathf.Cos(player.GetComponent<Player>().joyAngle);
+        float y = player.GetComponent<BoxCollider2D>().bounds.center.y + 8 * Mathf.Sin(player.GetComponent<Player>().joyAngle);
+
+        lineRender.SetPosition(1, new Vector2(x, y));
     }
 }

@@ -1,24 +1,35 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+using System.Collections.Generic;
 
 public class Enemy : MonoBehaviour {
-    public BoxCollider2D collider;
-    public SpriteRenderer sprite;
+    public float radius = 5;
+
+    public List<Action> moves = new List<Action>();
 
 	// Use this for initialization
 	void Start () {
-        collider = GetComponent<BoxCollider2D>();
-        sprite = GetComponent<SpriteRenderer>();
+        moves.Add(() => AreaAttack(radius));
+        moves.Add(() => LineAttack());
 	}
 
-    void OnTriggerEnter2D(Collider2D col) {
-        if(col.gameObject.tag == "Player") {
-            Debug.Log("Hit");
-            sprite.color = Color.red;
-        } 
+    public void OnPause() {
+        //Choose and execute move
+        moves[UnityEngine.Random.Range(0, moves.Count)].Invoke();
     }
 
-    void OnTriggerExit2D(Collider2D col) {
-        sprite.color = Color.black;
+    //====================================================
+    //                  Enemy Methods                    =
+    //====================================================
+
+    //Fires an area of effect attack of radius r
+    public void AreaAttack(float r) {
+        Debug.Log("AreaAttack");
+    }
+
+    //Chooses a direction close to the player and fires a beam
+    public void LineAttack() {
+        Debug.Log("LineAttack");
     }
 }

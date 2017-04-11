@@ -41,6 +41,8 @@ public class Player : MonoBehaviour {
     protected Controller2D controller;
     [HideInInspector]
     public Vector2 dirInput;
+    public float joyAngle;
+    public Vector2 telePos;
 
     // Use this for initialization
     void Start() {
@@ -80,32 +82,57 @@ public class Player : MonoBehaviour {
         dirInput = input;
     }
 
+    public void SetJoyAngle(float angle) {
+        joyAngle = angle;
+    }
+
+    public void SetPosition(Vector2 pos) {
+        transform.position = pos;
+    }
+
     public void OnJumpInputDown() {
         dirInput = new Vector2(0, 0);
+        
         if(wallSliding) {
             if(wallDirX == dirInput.x) { //Moving into wall
                 velocity.x = -wallDirX * wallJumpClimb.x;
                 velocity.y = wallJumpClimb.y;
-            } else
-            if(dirInput.x == 0) {
-                velocity.x = -wallDirX * wallJumpOff.x;
-                velocity.y = wallJumpOff.y;
             } else {
-                velocity.x = -wallDirX * wallLeap.x;
-                velocity.y = wallLeap.y;
+                if(dirInput.x == 0) {
+                    velocity.x = -wallDirX * wallJumpOff.x;
+                    velocity.y = wallJumpOff.y;
+                } else {
+                    velocity.x = -wallDirX * wallLeap.x;
+                    velocity.y = wallLeap.y;
+                }
             }
         }
 
         if(jumps < 2) {
             jumps++;
             velocity.y = maxJumpVelocity;
-        } 
+        }
     }
 
     public void OnJumpInputUp() {
         if(velocity.y > minJumpVelocity) {
             velocity.y = minJumpVelocity;
         }
+    }
+
+    public void OnCircleInputDown() {
+        //Execute move chosen
+        if(BattleController.Shared().IsPaused()) {
+            transform.position = GameObject.FindGameObjectWithTag("BlinkCursor").transform.position;
+            velocity.x = 0;
+            velocity.y = 0;
+
+            BattleController.Shared().SwitchPause();
+        }
+    }
+
+    public void OnCircleInputUp() {
+
     }
 
     void CalculateVelocity() {

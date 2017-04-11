@@ -13,16 +13,20 @@ public class PlayerInput : MonoBehaviour {
 	}
 	
 	void Update() {
-        Vector2 dirInput = new Vector2(Input.GetAxis("Horizontal"), 0);
+        Vector2 dirInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         player.SetDirectionalInput(dirInput);
-        //anim.SetFloat("Speed", Mathf.Abs(dirInput.x));
+        player.SetJoyAngle(JoyAngle());
 
-        if(Input.GetKeyDown(KeyCode.Space)) {
+        if(Input.GetButtonDown("X")) {
             player.OnJumpInputDown();
         }
 
-        if(Input.GetKeyUp(KeyCode.Space)) {
+        if(Input.GetButtonUp("X")) {
             player.OnJumpInputUp();
+        }
+
+        if(Input.GetButtonDown("Circle") || Input.GetKeyDown(KeyCode.Space)) {
+            player.OnCircleInputDown();
         }
 
         if(Input.GetKeyDown(KeyCode.LeftShift)) {
@@ -31,14 +35,14 @@ public class PlayerInput : MonoBehaviour {
     }
 
     //Returns a vector direction of the right joystick
-    Vector2 JoyAngle() {
+    float JoyAngle() {
         //X, Y, and angle of right joystick
-        float joyX = Input.GetAxis("PS4_LeftStickX");
-        float joyY = Input.GetAxis("PS4_LeftStickY");
+        float joyX = Input.GetAxis("LeftStick_X");
+        float joyY = Input.GetAxis("LeftStick_Y");
 
         //Gets computes angle from origin of right joystick location
-        float joyAngle = Mathf.Atan2(joyX, joyY) * 57;
+        float joyAngle = Mathf.Atan2(joyY, joyX);
 
-        return new Vector2(joyX, joyY);
+        return joyAngle;
     }
 }
